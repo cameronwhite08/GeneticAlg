@@ -58,8 +58,7 @@ namespace GeneticAlgorithm
                     samples[i].Eval = Evaluate(samples[i].Value);
                 }
 
-                Console.WriteLine("Generated population");
-                DisplaySamples(samples);
+                DisplaySamples("Generated population", samples);
 
                 var generationAverage = CalculateGenerationAverage(samples);
                 //to track average fitness per generation
@@ -72,23 +71,23 @@ namespace GeneticAlgorithm
                 //sort the samples (negative for descending order)
                 samples.Sort((sample1, sample2) => -sample1.Eval.CompareTo(sample2.Eval));
 
-                Console.WriteLine("Sorted Population:");
-                DisplaySamples(samples);
+                DisplaySamples("Sorted Population:", samples);
 
-                //crossover
-                Crossover(ref samples);
+                if (loops != 0) 
+                {
+                    //crossover
+                    Crossover(ref samples);
 
-                Console.WriteLine("After Crossover");
-                DisplaySamples(samples);
+                    DisplaySamples("After Crossover", samples);
 
-                //mutate
-                Mutate(ref samples);
+                    //mutate
+                    Mutate(ref samples);
 
-                Console.WriteLine("After Mutation:");
-                DisplaySamples(samples);
-
+                    DisplaySamples("After Mutation:", samples);
+                }
+                
                 Console.WriteLine("Average fitness: {0}", totalAverageFitness);
-                Console.WriteLine("Highest value seen: {0}", highestValue);
+                Console.WriteLine("Highest value seen: {0}\n", highestValue);
             }
 
             //print out generation averages in order
@@ -101,16 +100,15 @@ namespace GeneticAlgorithm
             Console.ReadLine();
         }
 
-        static void DisplaySamples(List<Sample> samplesIn)
+        static void DisplaySamples(string header, List<Sample> samplesIn)
         {
+            Console.WriteLine(header);
             for (int i = 0; i < samplesIn.Count; i++)
             {
-                Console.WriteLine("Sample {0}: {1} = {2} => {3}", i, samplesIn[i].Code, samplesIn[i].Value, samplesIn[i].Eval);
+                Console.WriteLine("Sample {0}: {1} = {2} => {3}\n", i, samplesIn[i].Code, samplesIn[i].Value, samplesIn[i].Eval);
             }
-            Console.WriteLine();
         }
-
-
+        
         #region Calculations
 
         //converting binary string to int equivilent
