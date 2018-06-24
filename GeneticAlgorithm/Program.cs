@@ -184,7 +184,7 @@ namespace GeneticAlgorithm
 
 			for (int i = 0; i < candidates * keep; i++)
 			{
-				//choose samples from the top 'keep' candidates
+                //choose samples from the top 'keep' candidates
 				Sample one = samplesIn[(int)((rand.Next() % candidates) * keep)];
 				Sample two = samplesIn[(int)((rand.Next() % candidates) * keep)];
 
@@ -195,22 +195,12 @@ namespace GeneticAlgorithm
 				int cut = rand.Next() % candidateSize;
 
 				//build new candidates
-				result1.Code = string.Empty;
-				result2.Code = string.Empty;
+                result1.Code = one.Code.Substring(0, cut);
+                result1.Code += two.Code.Substring(cut);
 
-				for (int j = 0; j < candidateSize; j++)
-				{
-					if (j<cut)
-					{
-						result1.Code += one.Code[j];
-						result2.Code += two.Code[j];
-					}
-					else
-					{
-						result1.Code += two.Code[j];
-						result2.Code += one.Code[j];
-					}
-				}
+				result2.Code = two.Code.Substring(0,  cut);
+                result2.Code += one.Code.Substring(cut);
+
 				results.Add(result1);
 				results.Add(result2);
 			}
