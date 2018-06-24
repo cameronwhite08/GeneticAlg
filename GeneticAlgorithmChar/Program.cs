@@ -7,9 +7,9 @@ namespace GeneticAlgorithmChar
 {
     class MainClass
     {
-        private const bool DisplayOutputInConsole = true;
+        private const bool DisplayOutputInConsole = false;
 
-        private const string GoalString = "cameron";
+        private const string GoalString = "cameronwhite";
 
         private static int Population = 8;
         private static float populationKeepRate = 0.5f;
@@ -45,6 +45,8 @@ namespace GeneticAlgorithmChar
                 //sort the samples (negative for descending order)
                 samples.Sort((sample1, sample2) => -sample1.Eval.CompareTo(sample2.Eval));
 
+                Console.WriteLine($"Top performer of generation: {ConvertIntArrayToString(samples[0].Code)}");
+
                 DisplaySamples("Sorted Population:", samples);
 
                 if (Epochs != 0) 
@@ -72,6 +74,17 @@ namespace GeneticAlgorithmChar
             Console.ReadLine();
         }
 
+        private static string ConvertIntArrayToString(int[] code)
+        {
+            var sampleCodeString = string.Empty;
+            for (int j = 0; j < code.Length; j++)
+            {
+                sampleCodeString += (char)('a' + code[j]);
+            }
+
+            return sampleCodeString;
+        }
+
         static void DisplaySamples(string header, List<Sample> samplesIn)
         {
             if (!DisplayOutputInConsole)
@@ -80,13 +93,9 @@ namespace GeneticAlgorithmChar
             Console.WriteLine(header);
             for (int i = 0; i < samplesIn.Count; i++)
             {
-                var sampleCodeString = string.Empty;
-                for (int j = 0; j < samplesIn[i].Code.Length; j++)
-                {
-                    sampleCodeString += (char)('a' + samplesIn[i].Code[j]);
-                }
+                
 
-                Console.WriteLine("Sample {0}: {1} => {2}", i, sampleCodeString, samplesIn[i].Eval);
+                Console.WriteLine("Sample {0}: {1} => {2}", i, ConvertIntArrayToString(samplesIn[i].Code), samplesIn[i].Eval);
             }
             Console.WriteLine();
         }
