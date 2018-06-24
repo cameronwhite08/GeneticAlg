@@ -4,8 +4,8 @@ namespace GeneticAlgorithm
     public class Sample
     {
         public string Code;
-        public int Value;
-        public int Eval;
+        public long Value;
+        public long Eval;
 
         public Sample()
         {

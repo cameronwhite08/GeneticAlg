@@ -7,15 +7,18 @@ namespace GeneticAlgorithm
 {
     class MainClass
     {
-        static int candidates = 8;
-        static int candidateSize = 12;
-        static float keep = 0.5f;
-        static float mutateRate = 0.2f;
-        private static int loops = 100;
-        private static long highestValue = 0;
-        private static long totalAverageFitness = 0;
+        private const bool DisplayOutputInConsole = false;
+
+        static int Population = 8;
+        static int BitStringSize = 12;
+        static float populationKeepRate = 0.5f;
+        static float MutateRate = 0.2f;
+
+        private static int Epochs = 100;
+
+        private static long HighestFitness = 0;
+        private static long RunningAverageFitness = 0;
         private static List<long> allAverages = new List<long>();
-        private const bool displayOutput = false;
 
         static Random rand = new Random(System.Guid.NewGuid().GetHashCode());
 
@@ -24,46 +27,43 @@ namespace GeneticAlgorithm
             //variables
             var samples = GenerateSamplePopulation();
 
-            while (loops-- > 0)
+            while (Epochs-- > 0)
             {
                 //convert samples to decimal
                 ConvertBinaryStringsToInts(samples);
 
                 //evaluate samples to decimal
                 EvaluateSamples(samples);
-
                 DisplaySamples("Generated population", samples);
 
                 var generationAverage = CalculateGenerationAverage(samples);
                 //to track average fitness per generation
                 //allAverages.Add(generationAverage);
 
-                totalAverageFitness = CalculateTotalAverage(generationAverage, totalAverageFitness);
+                RunningAverageFitness = CalculateTotalAverage(generationAverage, RunningAverageFitness);
                 //to track average fitness per generation
-                allAverages.Add(totalAverageFitness);
+                allAverages.Add(RunningAverageFitness);
 
                 //sort the samples (negative for descending order)
                 samples.Sort((sample1, sample2) => -sample1.Eval.CompareTo(sample2.Eval));
 
                 DisplaySamples("Sorted Population:", samples);
 
-                if (loops != 0) 
+                if (Epochs != 0) 
                 {
                     //crossover
                     Crossover(ref samples);
-
                     DisplaySamples("After Crossover", samples);
 
                     //mutate
                     Mutate(ref samples);
-
                     DisplaySamples("After Mutation:", samples);
                 }
 
-                if (displayOutput)
+                if (DisplayOutputInConsole)
                 {
-                    Console.WriteLine("Average fitness: {0}", totalAverageFitness);
-                    Console.WriteLine("Highest value seen: {0}\n", highestValue);
+                    Console.WriteLine("Average fitness: {0}", RunningAverageFitness);
+                    Console.WriteLine("Highest value seen: {0}\n", HighestFitness);
                 }
             }
 
@@ -74,14 +74,15 @@ namespace GeneticAlgorithm
 
         static void DisplaySamples(string header, List<Sample> samplesIn)
         {
-            if (!displayOutput)
+            if (!DisplayOutputInConsole)
                 return;
 
             Console.WriteLine(header);
             for (int i = 0; i < samplesIn.Count; i++)
             {
-                Console.WriteLine("Sample {0}: {1} = {2} => {3}\n", i, samplesIn[i].Code, samplesIn[i].Value, samplesIn[i].Eval);
+                Console.WriteLine("Sample {0}: {1} = {2} => {3}", i, samplesIn[i].Code, samplesIn[i].Value, samplesIn[i].Eval);
             }
+            Console.WriteLine();
         }
 
         static void WriteAveragesToFile()
@@ -102,10 +103,10 @@ namespace GeneticAlgorithm
             var samples = new List<Sample>();
 
             //generate sample population
-            for (int i = 0; i < candidates; i++)
+            for (int i = 0; i < Population; i++)
             {
                 var sample = new Sample();
-                for (int j = 0; j < candidateSize; j++)
+                for (int j = 0; j < BitStringSize; j++)
                 {
                     var chance = rand.Next() % 100;
                     if (chance >= 50)
@@ -135,9 +136,9 @@ namespace GeneticAlgorithm
         }
 
         //converting binary string to int equivilent
-        static int BinaryStringToInt(string sampleIn)
+        static long BinaryStringToInt(string sampleIn)
         {
-            var valu = 0;
+            var valu = 0L;
             var power = 0;
 
             //starting at end of string and working backwards
@@ -147,7 +148,7 @@ namespace GeneticAlgorithm
                 var powEval = Math.Pow(2, power++);
                 //convert string value to int value
                 var num = sampleIn[i] - '0';
-                valu += Convert.ToInt32(powEval * num);
+                valu += Convert.ToInt64(powEval * num);
             }
 
             return valu;
@@ -157,11 +158,11 @@ namespace GeneticAlgorithm
         {
             //calculate this generations average fitness
             long tempAverage = 0;
-            for (int i = 0; i < candidates; i++)
+            for (int i = 0; i < Population; i++)
             {
                 tempAverage += samples[i].Eval;
             }
-            tempAverage /= candidates;
+            tempAverage /= Population;
             return tempAverage;
         }
 
@@ -189,11 +190,12 @@ namespace GeneticAlgorithm
             }
         }
 
-        static int Evaluate(int valueIn)
+        static long Evaluate(long valueIn)
         {
-            var t = Convert.ToInt32(Math.Pow(valueIn, 2));
-            if (t > highestValue)
-                highestValue = t;
+            var t = Convert.ToInt64(Math.Pow(valueIn, 2));
+
+            if (t > HighestFitness)
+                HighestFitness = t;
             return t;
         }
 
@@ -205,17 +207,17 @@ namespace GeneticAlgorithm
         {
             List<Sample> results = new List<Sample>();
 
-            for (int i = 0; i < candidates * keep; i++)
+            for (int i = 0; i < Population * populationKeepRate; i++)
             {
                 //choose samples from the top 'keep' candidates
-                Sample one = samplesIn[(int)((rand.Next() % candidates) * keep)];
-                Sample two = samplesIn[(int)((rand.Next() % candidates) * keep)];
+                Sample one = samplesIn[(int)((rand.Next() % Population) * populationKeepRate)];
+                Sample two = samplesIn[(int)((rand.Next() % Population) * populationKeepRate)];
 
                 Sample result1 = new Sample();
                 Sample result2 = new Sample();
 
                 //choose a cut point
-                int cut = rand.Next() % candidateSize;
+                int cut = rand.Next() % BitStringSize;
 
                 //build new candidates
                 result1.Code = one.Code.Substring(0, cut);
@@ -239,23 +241,19 @@ namespace GeneticAlgorithm
             for (int i = 0; i < samplesIn.Count - 1; i++)
             {
                 //should we mutate
-                if (((rand.Next() % 10) / 10) < mutateRate)
+                if (((rand.Next() % 10) / 10f) < MutateRate)
                 {
                     //which element to mutate
-                    int mutateIndex = (rand.Next() % candidateSize);
-
+                    int mutateIndex = (rand.Next() % BitStringSize);
+                    var aStringBuilder = new StringBuilder(samplesIn[i].Code);
                     if (samplesIn[i].Code[mutateIndex].Equals('0'))
                     {
-                        var aStringBuilder = new StringBuilder(samplesIn[i].Code);
-                        aStringBuilder.Remove(i, 1);
-                        aStringBuilder.Insert(i, "1");
+                        aStringBuilder[mutateIndex] = '1';
                         samplesIn[i].Code = aStringBuilder.ToString();
                     }
                     else
                     {
-                        var aStringBuilder = new StringBuilder(samplesIn[i].Code);
-                        aStringBuilder.Remove(i, 1);
-                        aStringBuilder.Insert(i, "0");
+                        aStringBuilder[mutateIndex] = '0';
                         samplesIn[i].Code = aStringBuilder.ToString();
                     }
                 }
