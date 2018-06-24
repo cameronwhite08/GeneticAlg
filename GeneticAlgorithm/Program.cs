@@ -9,10 +9,10 @@ namespace GeneticAlgorithm
     {
         private const bool DisplayOutputInConsole = false;
 
-        static int Population = 8;
-        static int BitStringSize = 12;
-        static float populationKeepRate = 0.5f;
-        static float MutateRate = 0.2f;
+        private static int Population = 8;
+        private static int BitStringSize = 12;
+        private static float populationKeepRate = 0.5f;
+        private static float MutateRate = 0.2f;
 
         private static int Epochs = 100;
 
@@ -20,7 +20,7 @@ namespace GeneticAlgorithm
         private static long RunningAverageFitness = 0;
         private static List<long> allAverages = new List<long>();
 
-        static Random rand = new Random(System.Guid.NewGuid().GetHashCode());
+        private static Random rand = new Random(System.Guid.NewGuid().GetHashCode());
 
         public static void Main(string[] args)
         {
