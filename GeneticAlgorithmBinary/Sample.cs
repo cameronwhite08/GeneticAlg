@@ -1,5 +1,5 @@
 ﻿using System;
-namespace GeneticAlgorithm
+namespace GeneticAlgorithmBinary
 {
     public class Sample
     {

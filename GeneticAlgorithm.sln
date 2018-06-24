@@ -1,7 +1,8 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneticAlgorithm", "GeneticAlgorithm\GeneticAlgorithm.csproj", "{665143CE-0210-425B-9A2A-1101AE8C99B4}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2026
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneticAlgorithmBinary", "GeneticAlgorithmBinary\GeneticAlgorithmBinary.csproj", "{665143CE-0210-425B-9A2A-1101AE8C99B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,5 +14,11 @@ Global
 		{665143CE-0210-425B-9A2A-1101AE8C99B4}.Debug|x86.Build.0 = Debug|x86
 		{665143CE-0210-425B-9A2A-1101AE8C99B4}.Release|x86.ActiveCfg = Release|x86
 		{665143CE-0210-425B-9A2A-1101AE8C99B4}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AD20FC13-16F6-4419-AC65-49186EF7FEE8}
 	EndGlobalSection
 EndGlobal

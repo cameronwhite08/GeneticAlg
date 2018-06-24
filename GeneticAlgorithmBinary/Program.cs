@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace GeneticAlgorithm
+namespace GeneticAlgorithmBinary
 {
     class MainClass
     {
-        private const bool DisplayOutputInConsole = false;
+        private const bool DisplayOutputInConsole = true;
 
         private static int Population = 8;
-        private static int BitStringSize = 12;
+        private static int BitStringSize = 20;
         private static float populationKeepRate = 0.5f;
         private static float MutateRate = 0.2f;
 
@@ -66,6 +66,8 @@ namespace GeneticAlgorithm
                     Console.WriteLine("Highest value seen: {0}\n", HighestFitness);
                 }
             }
+
+            Console.WriteLine("Evolutions completed");
 
             WriteAveragesToFile();
 
