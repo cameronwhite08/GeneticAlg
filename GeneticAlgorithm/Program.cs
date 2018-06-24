@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace GeneticAlgorithm
@@ -18,7 +19,7 @@ namespace GeneticAlgorithm
         private static List<long> allAverages = new List<long>();
         private const bool displayOutput = false;
 
-        static Random rand = new Random();
+        static Random rand = new Random(System.Guid.NewGuid().GetHashCode());
 
         public static void Main(string[] args)
         {
@@ -73,13 +74,9 @@ namespace GeneticAlgorithm
                     Console.WriteLine("Highest value seen: {0}\n", highestValue);
                 }
             }
+            WriteAveragesToFile();
 
-            //print out generation averages in order
-            for (int i = 0; i < allAverages.Count; i++)
-            {
-                //Console.WriteLine("Generation {0}: {1}",i, allAverages[i]);
-                Console.WriteLine(allAverages[i]);
-            }
+            
 
             Console.ReadLine();
         }
@@ -93,6 +90,19 @@ namespace GeneticAlgorithm
             for (int i = 0; i < samplesIn.Count; i++)
             {
                 Console.WriteLine("Sample {0}: {1} = {2} => {3}\n", i, samplesIn[i].Code, samplesIn[i].Value, samplesIn[i].Eval);
+            }
+        }
+
+        static void WriteAveragesToFile()
+        {
+            using (StreamWriter writer = new StreamWriter("averages.txt"))
+            {
+                //print out generation averages in order
+                for (int i = 0; i < allAverages.Count; i++)
+                {
+                    //Console.WriteLine("Generation {0}: {1}",i, allAverages[i]);
+                    writer.WriteLine(allAverages[i]);
+                }
             }
         }
 
