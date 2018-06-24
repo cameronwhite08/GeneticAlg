@@ -69,20 +69,8 @@ namespace GeneticAlgorithm
                 //to track average fitness per generation
                 allAverages.Add(totalAverageFitness);
 
-                //sort according to fitness
-                for (int i = 0; i < samples.Count; i++)
-                {
-                    for (int j = i; j < samples.Count; j++)
-                    {
-                        if (samples[i].Eval < samples[j].Eval)
-                        {
-                            //switch
-                            Sample temp = samples[i];
-                            samples[i] = samples[j];
-                            samples[j] = temp;
-                        }
-                    }
-                }
+                //sort the samples (negative for descending order)
+                samples.Sort((sample1, sample2) => -sample1.Eval.CompareTo(sample2.Eval));
 
                 Console.WriteLine("Sorted Population:");
                 DisplaySamples(samples);
