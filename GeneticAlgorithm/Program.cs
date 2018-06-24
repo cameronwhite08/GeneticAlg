@@ -49,13 +49,13 @@ namespace GeneticAlgorithm
                 //convert samples to decimal
                 for (int i = 0; i < samples.Count; i++)
                 {
-                    samples[i].Value = toInt(samples[i].Code);
+                    samples[i].Value = BinaryStringToInt(samples[i].Code);
                 }
 
                 //evaluate samples to decimal
                 for (int i = 0; i < samples.Count; i++)
                 {
-                    samples[i].Eval = evaluate(samples[i].Value);
+                    samples[i].Eval = Evaluate(samples[i].Value);
                 }
 
                 Console.WriteLine("Generated population");
@@ -88,13 +88,13 @@ namespace GeneticAlgorithm
                 DisplaySamples(samples);
 
                 //crossover
-                crossover(ref samples);
+                Crossover(ref samples);
 
                 Console.WriteLine("After Crossover");
                 DisplaySamples(samples);
 
                 //mutate
-                mutate(ref samples);
+                Mutate(ref samples);
 
                 Console.WriteLine("After Mutation:");
                 DisplaySamples(samples);
@@ -113,34 +113,6 @@ namespace GeneticAlgorithm
 		    Console.ReadLine();
 		}
 
-        private static long CalculateGenerationAverage(List<Sample> samples)
-        {
-            //calculate this generations average fitness
-            long tempAverage = 0;
-            for (int i = 0; i < candidates; i++)
-            {
-                tempAverage += samples[i].Eval;
-            }
-            tempAverage /= candidates;
-            return tempAverage;
-        }
-
-        private static long CalculateTotalAverage(long generationAverage, long totalAverage)
-	    {
-            if(totalAverage > 0)
-            {
-                var tem = generationAverage + totalAverage;
-                tem /= 2;
-                totalAverage = tem;
-
-            }
-            else
-            {
-                totalAverage = generationAverage;
-            }
-            return totalAverage;
-	    }
-
         static void DisplaySamples(List<Sample> samplesIn)
 		{
 			for (int i = 0; i < samplesIn.Count; i++)
@@ -150,8 +122,11 @@ namespace GeneticAlgorithm
 			Console.WriteLine();
 		}
 
+
+#region Calculations
+
         //converting binary string to int equivilent
-		static int toInt(string sampleIn)
+        static int BinaryStringToInt(string sampleIn)
 		{
 			var valu = 0;
 			var power = 0;
@@ -169,8 +144,35 @@ namespace GeneticAlgorithm
 			return valu;
 		}
 
+	    private static long CalculateGenerationAverage(List<Sample> samples)
+	    {
+	        //calculate this generations average fitness
+	        long tempAverage = 0;
+	        for (int i = 0; i < candidates; i++)
+	        {
+	            tempAverage += samples[i].Eval;
+	        }
+	        tempAverage /= candidates;
+	        return tempAverage;
+	    }
 
-		static int evaluate(int valueIn)
+	    private static long CalculateTotalAverage(long generationAverage, long totalAverage)
+	    {
+	        if (totalAverage > 0)
+	        {
+	            var tem = generationAverage + totalAverage;
+	            tem /= 2;
+	            totalAverage = tem;
+
+	        }
+	        else
+	        {
+	            totalAverage = generationAverage;
+	        }
+	        return totalAverage;
+	    }
+
+        static int Evaluate(int valueIn)
 		{
             var t = Convert.ToInt32(Math.Pow(valueIn, 2));
 		    if (t > highestValue)
@@ -178,7 +180,11 @@ namespace GeneticAlgorithm
 		    return t;
 		}
 
-		static void crossover(ref List<Sample> samplesIn)
+#endregion
+
+#region Genetics
+
+        static void Crossover(ref List<Sample> samplesIn)
 		{
 			List<Sample> results = new List<Sample>();
 
@@ -211,7 +217,7 @@ namespace GeneticAlgorithm
 			}
 		}
 
-		static void mutate(ref List<Sample> samplesIn)
+		static void Mutate(ref List<Sample> samplesIn)
 		{
 			for (int i = 0; i < samplesIn.Count-1; i++)
 			{
@@ -238,5 +244,7 @@ namespace GeneticAlgorithm
 				}
 			}
 		}
-	}
+
+#endregion
+    }
 }
