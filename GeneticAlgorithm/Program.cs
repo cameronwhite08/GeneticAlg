@@ -5,8 +5,6 @@ using System.Text;
 
 namespace GeneticAlgorithm
 {
-    //max value seen so far
-    //avg fitness per generation
     class MainClass
     {
         static int candidates = 8;
@@ -29,16 +27,10 @@ namespace GeneticAlgorithm
             while (loops-- > 0)
             {
                 //convert samples to decimal
-                for (int i = 0; i < samples.Count; i++)
-                {
-                    samples[i].Value = BinaryStringToInt(samples[i].Code);
-                }
+                ConvertBinaryStringsToInts(samples);
 
                 //evaluate samples to decimal
-                for (int i = 0; i < samples.Count; i++)
-                {
-                    samples[i].Eval = Evaluate(samples[i].Value);
-                }
+                EvaluateSamples(samples);
 
                 DisplaySamples("Generated population", samples);
 
@@ -74,9 +66,8 @@ namespace GeneticAlgorithm
                     Console.WriteLine("Highest value seen: {0}\n", highestValue);
                 }
             }
-            WriteAveragesToFile();
 
-            
+            WriteAveragesToFile();
 
             Console.ReadLine();
         }
@@ -132,8 +123,16 @@ namespace GeneticAlgorithm
 
             return samples;
         }
-        
+
         #region Calculations
+
+        static void ConvertBinaryStringsToInts(List<Sample> samples)
+        {
+            foreach (var samp in samples)
+            {
+                samp.Value = BinaryStringToInt(samp.Code);
+            }
+        }
 
         //converting binary string to int equivilent
         static int BinaryStringToInt(string sampleIn)
@@ -180,6 +179,14 @@ namespace GeneticAlgorithm
                 totalAverage = generationAverage;
             }
             return totalAverage;
+        }
+
+        private static void EvaluateSamples(List<Sample> samples)
+        {
+            foreach (var samp in samples)
+            {
+                samp.Eval = Evaluate(samp.Value);
+            }
         }
 
         static int Evaluate(int valueIn)
