@@ -4,6 +4,8 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneticAlgorithmBinary", "GeneticAlgorithmBinary\GeneticAlgorithmBinary.csproj", "{665143CE-0210-425B-9A2A-1101AE8C99B4}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneticAlgorithmChar", "GeneticAlgorithmChar\GeneticAlgorithmChar.csproj", "{BF308035-4D45-4D74-889D-990538908A38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -14,6 +16,10 @@ Global
 		{665143CE-0210-425B-9A2A-1101AE8C99B4}.Debug|x86.Build.0 = Debug|x86
 		{665143CE-0210-425B-9A2A-1101AE8C99B4}.Release|x86.ActiveCfg = Release|x86
 		{665143CE-0210-425B-9A2A-1101AE8C99B4}.Release|x86.Build.0 = Release|x86
+		{BF308035-4D45-4D74-889D-990538908A38}.Debug|x86.ActiveCfg = Debug|x86
+		{BF308035-4D45-4D74-889D-990538908A38}.Debug|x86.Build.0 = Debug|x86
+		{BF308035-4D45-4D74-889D-990538908A38}.Release|x86.ActiveCfg = Release|x86
+		{BF308035-4D45-4D74-889D-990538908A38}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
