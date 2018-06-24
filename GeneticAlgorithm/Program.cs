@@ -4,7 +4,7 @@ using System.Text;
 
 namespace GeneticAlgorithm
 {
-	//max value seen so far
+    //max value seen so far
 	//avg fitness per generation
 	class MainClass
 	{
@@ -43,6 +43,7 @@ namespace GeneticAlgorithm
 
 				samples.Add(sample);
 			}
+
 			while (loops-- > 0)
 			{
 				//convert samples to decimal
@@ -116,10 +117,18 @@ namespace GeneticAlgorithm
 
 	    private static void CalculateAverage(long generationAverage)
 	    {
+            if(averageFitness > 0)
+            {
+                var tem = generationAverage + averageFitness;
+                tem /= 2;
+                averageFitness = tem;
+
+            }
+            else
+            {
+                averageFitness = generationAverage;
+            }
             allAverages.Add(averageFitness);
-	        var tem = generationAverage + averageFitness;
-	        tem /= 2;
-	        averageFitness = tem;
 	    }
 
 	    static void ShowSamples(List<Sample> samplesIn)
@@ -131,18 +140,25 @@ namespace GeneticAlgorithm
 			Console.WriteLine();
 		}
 
+        //converting binary string to int equivilent
 		static int toInt(string sampleIn)
 		{
 			var valu = 0;
 			var power = 0;
 
+            //starting at end of string and working backwards
 			for (int i = sampleIn.Length-1; i >= 0; i--)
 			{
-				valu += Convert.ToInt32(Math.Pow(2, power++) * (sampleIn[i] - '0'));
+                //get the correct base 2 value for this index in the binary string
+                var powEval = Math.Pow(2, power++);
+                //convert string value to int value
+                var num = sampleIn[i] - '0';
+                valu += Convert.ToInt32(powEval * num);
 			}
 
 			return valu;
 		}
+
 
 		static int evaluate(int valueIn)
 		{
@@ -221,20 +237,6 @@ namespace GeneticAlgorithm
 					}
 				}
 			}
-		}
-	}
-
-	class Sample
-	{
-		public string Code;
-		public int Value;
-		public int Eval;
-
-		public Sample()
-		{
-			Code = string.Empty;
-			Value = 0;
-			Eval = -1;
 		}
 	}
 }
