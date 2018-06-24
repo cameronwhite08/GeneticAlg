@@ -14,7 +14,7 @@ namespace GeneticAlgorithm
 		static float mutateRate = 0.2f;
 	    private static int loops = 100;
 	    private static long highestValue = 0;
-	    private static long averageFitness = 0;
+	    private static long totalAverageFitness = 0;
         private static List<long> allAverages = new List<long>();
 
 		static Random rand = new Random();
@@ -45,68 +45,66 @@ namespace GeneticAlgorithm
 			}
 
 			while (loops-- > 0)
-			{
-				//convert samples to decimal
-				for (int i = 0; i < samples.Count; i++)
-				{
-					samples[i].Value = toInt(samples[i].Code);
-				}
+            {
+                //convert samples to decimal
+                for (int i = 0; i < samples.Count; i++)
+                {
+                    samples[i].Value = toInt(samples[i].Code);
+                }
 
-				//evaluate samples to decimal
-				for (int i = 0; i < samples.Count; i++)
-				{
-					samples[i].Eval = evaluate(samples[i].Value);
-				}
+                //evaluate samples to decimal
+                for (int i = 0; i < samples.Count; i++)
+                {
+                    samples[i].Eval = evaluate(samples[i].Value);
+                }
 
                 Console.WriteLine("Generated population");
-				ShowSamples(samples);
+                DisplaySamples(samples);
 
-                //calculate this generations average fitness
-                long tempAverage = 0;
-                for (int i = 0; i < candidates; i++)
-                {
-                    tempAverage += samples[i].Eval;
-                }
-                tempAverage /= candidates;
+                var generationAverage = CalculateGenerationAverage(samples);
+                //to track average fitness per generation
+                //allAverages.Add(generationAverage);
 
-                CalculateAverage(tempAverage);
+                totalAverageFitness = CalculateTotalAverage(generationAverage, totalAverageFitness);
+                //to track average fitness per generation
+                allAverages.Add(totalAverageFitness);
 
                 //sort according to fitness
                 for (int i = 0; i < samples.Count; i++)
-				{
-					for (int j = i; j < samples.Count; j++)
-					{
-						if (samples[i].Eval < samples[j].Eval)
-						{
-							//switch
-							Sample temp = samples[i];
-							samples[i] = samples[j];
-							samples[j] = temp;
-						}
-					}
-				}
+                {
+                    for (int j = i; j < samples.Count; j++)
+                    {
+                        if (samples[i].Eval < samples[j].Eval)
+                        {
+                            //switch
+                            Sample temp = samples[i];
+                            samples[i] = samples[j];
+                            samples[j] = temp;
+                        }
+                    }
+                }
 
                 Console.WriteLine("Sorted Population:");
-				ShowSamples(samples);
+                DisplaySamples(samples);
 
-				//crossover
-				crossover(ref samples);
+                //crossover
+                crossover(ref samples);
 
                 Console.WriteLine("After Crossover");
-				ShowSamples(samples);
+                DisplaySamples(samples);
 
-				//mutate
-				mutate(ref samples);
+                //mutate
+                mutate(ref samples);
 
                 Console.WriteLine("After Mutation:");
-				ShowSamples(samples);
+                DisplaySamples(samples);
 
-                Console.WriteLine("Average fitness: {0}", averageFitness);
-			    Console.WriteLine("Highest value seen: {0}", highestValue);
-			}
+                Console.WriteLine("Average fitness: {0}", totalAverageFitness);
+                Console.WriteLine("Highest value seen: {0}", highestValue);
+            }
 
             //print out generation averages in order
-		    for (int i = 0; i < allAverages.Count; i++)
+            for (int i = 0; i < allAverages.Count; i++)
 		    {
 		        //Console.WriteLine("Generation {0}: {1}",i, allAverages[i]);
 		        Console.WriteLine(allAverages[i]);
@@ -115,23 +113,35 @@ namespace GeneticAlgorithm
 		    Console.ReadLine();
 		}
 
-	    private static void CalculateAverage(long generationAverage)
-	    {
-            if(averageFitness > 0)
+        private static long CalculateGenerationAverage(List<Sample> samples)
+        {
+            //calculate this generations average fitness
+            long tempAverage = 0;
+            for (int i = 0; i < candidates; i++)
             {
-                var tem = generationAverage + averageFitness;
+                tempAverage += samples[i].Eval;
+            }
+            tempAverage /= candidates;
+            return tempAverage;
+        }
+
+        private static long CalculateTotalAverage(long generationAverage, long totalAverage)
+	    {
+            if(totalAverage > 0)
+            {
+                var tem = generationAverage + totalAverage;
                 tem /= 2;
-                averageFitness = tem;
+                totalAverage = tem;
 
             }
             else
             {
-                averageFitness = generationAverage;
+                totalAverage = generationAverage;
             }
-            allAverages.Add(averageFitness);
+            return totalAverage;
 	    }
 
-	    static void ShowSamples(List<Sample> samplesIn)
+        static void DisplaySamples(List<Sample> samplesIn)
 		{
 			for (int i = 0; i < samplesIn.Count; i++)
 			{
