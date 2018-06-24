@@ -9,12 +9,13 @@ namespace GeneticAlgorithmChar
     {
         private const bool DisplayOutputInConsole = true;
 
+        private const string GoalString = "cameron";
+
         private static int Population = 8;
-        private static int BitStringSize = 20;
         private static float populationKeepRate = 0.5f;
         private static float MutateRate = 0.2f;
 
-        private static int Epochs = 100;
+        private static int Epochs = 500;
 
         private static long HighestFitness = 0;
         private static long RunningAverageFitness = 0;
@@ -25,14 +26,11 @@ namespace GeneticAlgorithmChar
         public static void Main(string[] args)
         {
             //variables
-            var samples = GenerateSamplePopulation();
+            var samples = GeneratePopulation();
 
             while (Epochs-- > 0)
             {
-                //convert samples to decimal
-                ConvertBinaryStringsToInts(samples);
-
-                //evaluate samples to decimal
+                //evaluate samples
                 EvaluateSamples(samples);
                 DisplaySamples("Generated population", samples);
 
@@ -82,7 +80,13 @@ namespace GeneticAlgorithmChar
             Console.WriteLine(header);
             for (int i = 0; i < samplesIn.Count; i++)
             {
-                Console.WriteLine("Sample {0}: {1} = {2} => {3}", i, samplesIn[i].Code, samplesIn[i].Value, samplesIn[i].Eval);
+                var sampleCodeString = string.Empty;
+                for (int j = 0; j < samplesIn[i].Code.Length; j++)
+                {
+                    sampleCodeString += (char)('a' + samplesIn[i].Code[j]);
+                }
+
+                Console.WriteLine("Sample {0}: {1} => {2}", i, sampleCodeString, samplesIn[i].Eval);
             }
             Console.WriteLine();
         }
@@ -100,25 +104,18 @@ namespace GeneticAlgorithmChar
             }
         }
 
-        private static List<Sample> GenerateSamplePopulation()
+        private static List<Sample> GeneratePopulation()
         {
             var samples = new List<Sample>();
 
             //generate sample population
             for (int i = 0; i < Population; i++)
             {
-                var sample = new Sample();
-                for (int j = 0; j < BitStringSize; j++)
+                var sample = new Sample(GoalString.Length);
+                for (int j = 0; j < GoalString.Length; j++)
                 {
-                    var chance = rand.Next() % 100;
-                    if (chance >= 50)
-                    {
-                        sample.Code += "1";
-                    }
-                    else
-                    {
-                        sample.Code += "0";
-                    }
+                    //26 letters in the alphabet
+                    sample.Code[j] = rand.Next() % 26;
                 }
 
                 samples.Add(sample);
@@ -128,33 +125,6 @@ namespace GeneticAlgorithmChar
         }
 
         #region Calculations
-
-        static void ConvertBinaryStringsToInts(List<Sample> samples)
-        {
-            foreach (var samp in samples)
-            {
-                samp.Value = BinaryStringToInt(samp.Code);
-            }
-        }
-
-        //converting binary string to int equivilent
-        static long BinaryStringToInt(string sampleIn)
-        {
-            var valu = 0L;
-            var power = 0;
-
-            //starting at end of string and working backwards
-            for (int i = sampleIn.Length - 1; i >= 0; i--)
-            {
-                //get the correct base 2 value for this index in the binary string
-                var powEval = Math.Pow(2, power++);
-                //convert string value to int value
-                var num = sampleIn[i] - '0';
-                valu += Convert.ToInt64(powEval * num);
-            }
-
-            return valu;
-        }
 
         private static long CalculateGenerationAverage(List<Sample> samples)
         {
@@ -188,17 +158,28 @@ namespace GeneticAlgorithmChar
         {
             foreach (var samp in samples)
             {
-                samp.Eval = Evaluate(samp.Value);
+                samp.Eval = EvaluateSample(samp.Code);
             }
         }
 
-        static long Evaluate(long valueIn)
+        static long EvaluateSample(int[] valueIn)
         {
-            var t = Convert.ToInt64(Math.Pow(valueIn, 2));
+            
 
-            if (t > HighestFitness)
-                HighestFitness = t;
-            return t;
+            var numCorrect = 0;
+            for (int i = 0; i < GoalString.Length; i++)
+            {
+                var correct = valueIn[i] == GoalString[i] - 'a';
+
+                if (correct)
+                    numCorrect++;
+            }
+
+            var fitness = Convert.ToInt64(Math.Pow(2, numCorrect));
+
+            if (fitness > HighestFitness)
+                HighestFitness = fitness;
+            return fitness;
         }
 
         #endregion
@@ -215,18 +196,17 @@ namespace GeneticAlgorithmChar
                 Sample one = samplesIn[(int)((rand.Next() % Population) * populationKeepRate)];
                 Sample two = samplesIn[(int)((rand.Next() % Population) * populationKeepRate)];
 
-                Sample result1 = new Sample();
-                Sample result2 = new Sample();
+                Sample result1 = new Sample(GoalString.Length);
+                Sample result2 = new Sample(GoalString.Length);
 
                 //choose a cut point
-                int cut = rand.Next() % BitStringSize;
+                int cut = rand.Next() % GoalString.Length;
 
-                //build new candidates
-                result1.Code = one.Code.Substring(0, cut);
-                result1.Code += two.Code.Substring(cut);
+                Array.Copy(one.Code, 0, result1.Code, 0, cut);
+                Array.Copy(two.Code, cut, result1.Code, cut, two.Code.Length-cut);
 
-                result2.Code = two.Code.Substring(0, cut);
-                result2.Code += one.Code.Substring(cut);
+                Array.Copy(two.Code, 0, result2.Code, 0, cut);
+                Array.Copy(one.Code, cut, result2.Code, cut, one.Code.Length - cut);
 
                 results.Add(result1);
                 results.Add(result2);
@@ -246,18 +226,8 @@ namespace GeneticAlgorithmChar
                 if (((rand.Next() % 10) / 10f) < MutateRate)
                 {
                     //which element to mutate
-                    int mutateIndex = (rand.Next() % BitStringSize);
-                    var aStringBuilder = new StringBuilder(samplesIn[i].Code);
-                    if (samplesIn[i].Code[mutateIndex].Equals('0'))
-                    {
-                        aStringBuilder[mutateIndex] = '1';
-                        samplesIn[i].Code = aStringBuilder.ToString();
-                    }
-                    else
-                    {
-                        aStringBuilder[mutateIndex] = '0';
-                        samplesIn[i].Code = aStringBuilder.ToString();
-                    }
+                    int mutateIndex = (rand.Next() % GoalString.Length);
+                    samplesIn[i].Code[mutateIndex] = rand.Next() % 26;
                 }
             }
         }

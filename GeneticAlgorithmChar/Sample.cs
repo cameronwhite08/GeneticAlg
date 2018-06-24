@@ -3,14 +3,12 @@ namespace GeneticAlgorithmChar
 {
     public class Sample
     {
-        public string Code;
-        public long Value;
+        public int[] Code;
         public long Eval;
 
-        public Sample()
+        public Sample(int codeLength)
         {
-            Code = string.Empty;
-            Value = 0;
+            Code = new int[codeLength];
             Eval = -1;
         }
     }
