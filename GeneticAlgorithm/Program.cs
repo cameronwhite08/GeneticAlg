@@ -16,33 +16,14 @@ namespace GeneticAlgorithm
         private static long highestValue = 0;
         private static long totalAverageFitness = 0;
         private static List<long> allAverages = new List<long>();
+        private const bool displayOutput = false;
 
         static Random rand = new Random();
 
         public static void Main(string[] args)
         {
             //variables
-            var samples = new List<Sample>();
-
-            //generate sample population
-            for (int i = 0; i < candidates; i++)
-            {
-                var sample = new Sample();
-                for (int j = 0; j < candidateSize; j++)
-                {
-                    var chance = rand.Next() % 100;
-                    if (chance >= 50)
-                    {
-                        sample.Code += "1";
-                    }
-                    else
-                    {
-                        sample.Code += "0";
-                    }
-                }
-
-                samples.Add(sample);
-            }
+            var samples = GenerateSamplePopulation();
 
             while (loops-- > 0)
             {
@@ -85,9 +66,12 @@ namespace GeneticAlgorithm
 
                     DisplaySamples("After Mutation:", samples);
                 }
-                
-                Console.WriteLine("Average fitness: {0}", totalAverageFitness);
-                Console.WriteLine("Highest value seen: {0}\n", highestValue);
+
+                if (displayOutput)
+                {
+                    Console.WriteLine("Average fitness: {0}", totalAverageFitness);
+                    Console.WriteLine("Highest value seen: {0}\n", highestValue);
+                }
             }
 
             //print out generation averages in order
@@ -102,11 +86,41 @@ namespace GeneticAlgorithm
 
         static void DisplaySamples(string header, List<Sample> samplesIn)
         {
+            if (!displayOutput)
+                return;
+
             Console.WriteLine(header);
             for (int i = 0; i < samplesIn.Count; i++)
             {
                 Console.WriteLine("Sample {0}: {1} = {2} => {3}\n", i, samplesIn[i].Code, samplesIn[i].Value, samplesIn[i].Eval);
             }
+        }
+
+        private static List<Sample> GenerateSamplePopulation()
+        {
+            var samples = new List<Sample>();
+
+            //generate sample population
+            for (int i = 0; i < candidates; i++)
+            {
+                var sample = new Sample();
+                for (int j = 0; j < candidateSize; j++)
+                {
+                    var chance = rand.Next() % 100;
+                    if (chance >= 50)
+                    {
+                        sample.Code += "1";
+                    }
+                    else
+                    {
+                        sample.Code += "0";
+                    }
+                }
+
+                samples.Add(sample);
+            }
+
+            return samples;
         }
         
         #region Calculations
