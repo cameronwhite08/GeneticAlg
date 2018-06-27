@@ -173,8 +173,6 @@ namespace GeneticAlgorithmChar
 
         static long EvaluateSample(int[] valueIn)
         {
-            
-
             var numCorrect = 0;
             for (int i = 0; i < GoalString.Length; i++)
             {
