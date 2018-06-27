@@ -8,4 +8,4 @@ Continued work is exploring usage/applications of genetic algorithms.
 Improving performance
 
 ### Future Plans
- - Convert to a generic library for running Genetic Algorithm projects
+ - ~~Convert to a generic library for running Genetic Algorithm projects~~
