@@ -58,14 +58,14 @@ namespace GeneticAlgWithLibrary
             //select the top performers for reproduction
             var selection = new EliteSelection();
 
-            //like is sounds, cut and splice chromosomes
-            var crossover = new CutAndSpliceCrossover();
+            //get half of genetic material from each parent
+            var crossover = new UniformCrossover(.5f);
             
             //our numbers are internally represented as binary strings, randomly flip those bits
             var mutation = new FlipBitMutation();
 
-            //stop mutating when there are 10 generations of stagnation
-            var termination = new FitnessStagnationTermination(10);
+            //stop mutating when there the goal is met (paried definition with fitness function)
+            var termination = new FitnessThresholdTermination(Math.Pow(2, GoalString.Length));
 
             //put the genetic algorithm together
             var ga = new GeneticAlgorithm(
@@ -86,14 +86,14 @@ namespace GeneticAlgWithLibrary
                 if (bestFitness != HighestFitness)
                 {
                     HighestFitness = bestFitness;
-                    var phenotype = bestChromosome.ToFloatingPoints();
-
-                    var ints = phenotype.Select(Convert.ToInt32).ToArray();
-
-                    var bestString = ConvertIntArrayToString(ints);
-
-                    Console.WriteLine($"Best string: {bestString}");
                 }
+                var phenotype = bestChromosome.ToFloatingPoints();
+
+                var ints = phenotype.Select(Convert.ToInt32).ToArray();
+
+                var bestString = ConvertIntArrayToString(ints);
+
+                Console.WriteLine($"Best string: {bestString}");
             };
 
             ga.TerminationReached += (sender, eventArgs) => { Console.WriteLine("Finished Evolving"); };
@@ -106,10 +106,10 @@ namespace GeneticAlgWithLibrary
         private static string ConvertIntArrayToString(int[] code)
         {
             var sampleCodeString = string.Empty;
-            for (int j = 0; j < code.Length; j++)
+            foreach (var val in code)
             {
-                //ascii
-                sampleCodeString += (char)('a' + code[j]);
+//ascii
+                sampleCodeString += (char)('a' + val);
             }
 
             return sampleCodeString;
