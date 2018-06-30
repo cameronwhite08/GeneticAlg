@@ -22,22 +22,17 @@ namespace GeneticAlgWithLibrary
 
         public static void Main(string[] args)
         {
-            //represents the parameters of a sample in the population
-            var minValues = new double[GoalString.Length];
-            var maxvalues = new double[GoalString.Length];
-            var bitsNeeded = new int[GoalString.Length];
-            var decimalsRequired = new int[GoalString.Length];
-
-            for (int i = 0; i < GoalString.Length; i++)
-            {
-                minValues[i] = 0;
-                maxvalues[i] = 25;
-                bitsNeeded[i] = 5;
-                decimalsRequired[i] = 0;
-            }
-            
             //represents a sample in the population
-            var chromosome = new FloatingPointChromosome(minValues, maxvalues, bitsNeeded, decimalsRequired);
+            var chromosome = new FloatingPointChromosome(
+                //min values array
+                Enumerable.Repeat(0.0, GoalString.Length).ToArray(),
+                //max values array
+                Enumerable.Repeat(25.0, GoalString.Length).ToArray(),
+                //bits nneded array
+                Enumerable.Repeat(5, GoalString.Length).ToArray(),
+                //decimals required array
+                Enumerable.Repeat(0, GoalString.Length).ToArray()
+                );
 
             //create the population
             var population = new Population(4, 8, chromosome);
