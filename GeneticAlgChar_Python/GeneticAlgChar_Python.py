@@ -5,32 +5,54 @@ from deap import base
 from deap import creator
 from deap import tools
 
+import numpy as np
+
+
+# sigmoid function
+def nonlin(x):
+    print(x)
+    return 1 / (1 + np.exp(-x))
+
+def getRandWeight():
+    return 2 * np.random.random(1) - 1
+
+def individualTonpArray(x):
+    return np.array([arr for arr in x])
+
+def forwardProp(individual):
+    syn0 = individualTonpArray(individual)
+
+    l0 = X
+    l1 = nonlin(np.dot(l0, syn0))
+    return l1
 
 # the goal ('fitness') function to be maximized
 def evaluate_individual(individual):
-    numCorrect = 0
-    for guess, goal in zip(individual, goalString):
-        if guess == ord(goal) - ord('a'):
-            numCorrect += 1
+    l1 = forwardProp(individual)
 
-    return pow(2, numCorrect),
+    # how much did we miss?
+    l1_error = y - l1
 
-
-def char_codes_to_char(ints):
-    strin = ''
-    for i in ints:
-        strin += chr(ord('a') + i)
-    return strin
+    return 1-abs(sum(l1_error)),
 
 # global vars
-goalString = 'cameronwhite'
 Mutation_Probability = 0.2
 population_size = 12
-max_fitness = 0
+current_max_fitness = 1
 generation = 0
+
+# input dataset
+X = np.array([[0, 0, 1],
+              [0, 1, 1],
+              [1, 0, 1],
+              [1, 1, 1]])
+
+# output dataset
+y = np.array([[0, 0, 1, 1]]).T
 
 # seed the random
 random.seed(int(time.time()))
+np.random.seed(int(time.time()))
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -38,9 +60,9 @@ creator.create("Individual", list, fitness=creator.FitnessMax)
 toolbox = base.Toolbox()
 
 # Attribute generator which samples uniformly from the range [0,25]
-toolbox.register("rand_letter", random.randint, 0, 25)
+toolbox.register("rand_weight", getRandWeight)
 # define 'individual' to have len(goalString) 'rand_letter' elements ('genes')
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.rand_letter, len(goalString))
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.rand_weight, 3)
 # define the population to be a list of individuals
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 # register the fitness function
@@ -62,7 +84,7 @@ for ind, fit in zip(pop, fitnesses):
     ind.fitness.values = fit
 
 # Evolution loop
-while max_fitness < pow(2, len(goalString)):
+while current_max_fitness > .01:
 
     # Select the top 20% of the population
     offspring = toolbox.select(pop, int(len(pop) * .2))  # take top 20% of population
@@ -82,16 +104,22 @@ while max_fitness < pow(2, len(goalString)):
             toolbox.mutate(mutant)
 
     # Evaluate the individuals
-    fitnesses = map(toolbox.evaluate, offspring)
+    print('-'*20)
+    t = [individualTonpArray(x) for x in offspring]
+    # for i in t:
+    #     print(i)
+
+    fitnesses = map(toolbox.evaluate, t)
     for ind, fit in zip(offspring, fitnesses):
         ind.fitness.values = fit
 
     # The population is entirely replaced by the offspring
     pop[:] = offspring
 
-    best_individual = tools.selBest(pop, 1)[0]
-    max_fitness = best_individual.fitness.values[0]
-    print("Best of generation {0}: {1}".format(generation, char_codes_to_char(best_individual)))
+    best_individual = tools.selBest(pop, 1)
+    best_individual = best_individual[0]
+    current_max_fitness = best_individual.fitness.values[0]
+    print("Best of generation {0}: {1}".format(generation, forwardProp(best_individual)))
     generation = generation + 1
 
 print("-- End of evolution --")
