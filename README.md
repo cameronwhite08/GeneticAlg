@@ -9,3 +9,6 @@ Improving performance
 
 ### Future Plans
  - ~~Convert to a generic library for running Genetic Algorithm projects~~
+ - ~~Implement string guessing Genetic Algorithm~~
+ - ~~Create Evolutionary Algorithm in Python~~
+ - Evolve Neural Networks
