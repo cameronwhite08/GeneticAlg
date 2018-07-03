@@ -7,12 +7,17 @@ from deap import tools
 
 import numpy as np
 
+# global control vars
+Mutation_Probability = 0.7
+population_size = 50
+current_max_fitness = 1
+generation = 0
 
 # sigmoid function
 def nonlin(x):
     return 1 / (1 + np.exp(-x))
 
-def getRandWeight():
+def getRandWeight(z=None):
     return float(2 * np.random.random(1) - 1)
 
 def individualTonpArray(x):
@@ -34,21 +39,18 @@ def evaluate_individual(individual):
 
     return float(1-np.abs(np.sum(l1_error))),
 
-
-# global vars
-Mutation_Probability = 0.5
-population_size = 100
-current_max_fitness = 1
-generation = 0
-
+# currently trying to evolve the AND gate
 # input dataset
-X = np.array([[0, 0, 1],
-              [0, 1, 1],
-              [1, 0, 1],
-              [1, 1, 1]])
+X = np.array([[0, 0],
+              [0, 1],
+              [1, 0],
+              [1, 1]])
 
 # output dataset
-y = np.array([[0, 0, 1, 1]]).T
+y = np.array([[0,
+               0,
+               0,
+               1]]).T
 
 # seed the random
 random.seed(int(time.time()))
@@ -62,15 +64,15 @@ toolbox = base.Toolbox()
 # Attribute generator which samples uniformly from the range [0,25]
 toolbox.register("rand_weight", getRandWeight)
 # define 'individual' to have len(goalString) 'rand_letter' elements ('genes')
-toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.rand_weight, 3)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.rand_weight, 2)
 # define the population to be a list of individuals
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 # register the fitness function
 toolbox.register("evaluate", evaluate_individual)
 # register the crossover function
-toolbox.register("crossover", tools.cxOnePoint)
+toolbox.register("crossover", tools.cxUniform, indpb=.5)
 # register a mutation operator with a probability to flip each gene of 0.05
-toolbox.register("mutate", tools.mutUniformInt, low=0, up=25, indpb=0.1)
+toolbox.register("mutate", getRandWeight)
 # set the selection method to grab the top performers
 toolbox.register("select", tools.selBest)
 
