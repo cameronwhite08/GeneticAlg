@@ -10,11 +10,10 @@ import numpy as np
 
 # sigmoid function
 def nonlin(x):
-    print(x)
     return 1 / (1 + np.exp(-x))
 
 def getRandWeight():
-    return 2 * np.random.random(1) - 1
+    return float(2 * np.random.random(1) - 1)
 
 def individualTonpArray(x):
     return np.array([arr for arr in x])
@@ -33,11 +32,12 @@ def evaluate_individual(individual):
     # how much did we miss?
     l1_error = y - l1
 
-    return 1-abs(sum(l1_error)),
+    return float(1-np.abs(np.sum(l1_error))),
+
 
 # global vars
-Mutation_Probability = 0.2
-population_size = 12
+Mutation_Probability = 0.5
+population_size = 100
 current_max_fitness = 1
 generation = 0
 
@@ -104,12 +104,8 @@ while current_max_fitness > .01:
             toolbox.mutate(mutant)
 
     # Evaluate the individuals
-    print('-'*20)
-    t = [individualTonpArray(x) for x in offspring]
-    # for i in t:
-    #     print(i)
-
-    fitnesses = map(toolbox.evaluate, t)
+    population = [individualTonpArray(x) for x in offspring]
+    fitnesses = map(toolbox.evaluate, population)
     for ind, fit in zip(offspring, fitnesses):
         ind.fitness.values = fit
 
@@ -119,7 +115,8 @@ while current_max_fitness > .01:
     best_individual = tools.selBest(pop, 1)
     best_individual = best_individual[0]
     current_max_fitness = best_individual.fitness.values[0]
-    print("Best of generation {0}: {1}".format(generation, forwardProp(best_individual)))
+    if generation % 100 is 0:
+        print("{0}: {1}".format(generation, forwardProp(best_individual)))
     generation = generation + 1
 
 print("-- End of evolution --")
