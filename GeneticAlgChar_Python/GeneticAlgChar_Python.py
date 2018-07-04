@@ -15,27 +15,29 @@ generation_counter = 0
 gens_before_print = 100
 pop_keep_percent = .2
 
+
 # sigmoid function
 def nonlin(x):
     return 1 / (1 + np.exp(-x))
 
 
-def getRandWeight():
+def rand_weight():
     return float(2 * np.random.random(1) - 1)
 
-def mutateIndividualWeight(individual, indpb = .5):
+
+def mutate_ind_weight(individual, indpb=.5):
     for idx in range(len(individual)):
         if random.random() < indpb:
-            individual[idx] = getRandWeight()
+            individual[idx] = rand_weight()
     return individual
 
 
-def individualTonpArray(x):
+def ind_to_np_array(x):
     return np.array([arr for arr in x])
 
 
-def forwardProp(individual):
-    syn0 = individualTonpArray(individual)
+def forward_prop(individual):
+    syn0 = ind_to_np_array(individual)
 
     l0 = X
     l1 = nonlin(np.dot(l0, syn0))
@@ -44,7 +46,7 @@ def forwardProp(individual):
 
 # the goal ('fitness') function to be maximized
 def evaluate_individual(individual):
-    l1 = forwardProp(individual)
+    l1 = forward_prop(individual)
 
     # how much did we miss?
     l1_error = y - l1
@@ -52,11 +54,14 @@ def evaluate_individual(individual):
     return float(1-np.abs(np.sum(l1_error))),
 
 
-def printGenerationInfo(print_divider = True):
-    print("{0}: {1} -- {2}".format(generation_counter, forwardProp(best_individual), current_max_fitness))
-    print("{0}:{1}".format(best_individual[0], best_individual[1]))
+def print_gen_info(print_divider=True):
+    print("Generation {0} outputs: {1} -- fitness: {2}".format(generation_counter,
+                                                               forward_prop(best_individual),
+                                                               current_max_fitness))
+    print("Evolved weights {0}:{1}".format(best_individual[0], best_individual[1]))
     if print_divider:
         print('-' * 20)
+
 
 # currently trying to evolve the AND gate
 # input dataset
@@ -65,7 +70,7 @@ X = np.array([[0, 0],
               [1, 0],
               [1, 1]])
 
-# output dataset
+# output data set
 y = np.array([[0,
                0,
                0,
@@ -81,7 +86,7 @@ creator.create("Individual", list, fitness=creator.FitnessMax)
 toolbox = base.Toolbox()
 
 # Attribute generator which samples uniformly from the range [0,25]
-toolbox.register("rand_weight", getRandWeight)
+toolbox.register("rand_weight", rand_weight)
 # define 'individual' to have len(goalString) 'rand_letter' elements ('genes')
 toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.rand_weight, 2)
 # define the population to be a list of individuals
@@ -91,7 +96,7 @@ toolbox.register("evaluate", evaluate_individual)
 # register the crossover function
 toolbox.register("crossover", tools.cxUniform, indpb=.5)
 # register a mutation operator with a probability to flip each gene of 0.05
-toolbox.register("mutate", mutateIndividualWeight)
+toolbox.register("mutate", mutate_ind_weight)
 # set the selection method to grab the top performers
 toolbox.register("select", tools.selBest)
 
@@ -142,7 +147,7 @@ while abs(current_max_fitness) > .01:
             toolbox.mutate(mutant)
 
     # Evaluate the individuals
-    population = [individualTonpArray(x) for x in next_gen]
+    population = [ind_to_np_array(x) for x in next_gen]
     fitnesses = map(toolbox.evaluate, population)
     for ind, fit in zip(next_gen, fitnesses):
         ind.fitness.values = fit
@@ -155,10 +160,8 @@ while abs(current_max_fitness) > .01:
     current_max_fitness = best_individual.fitness.values[0]
 
     if generation_counter % gens_before_print is 0:
-        printGenerationInfo()
+        print_gen_info()
     generation_counter = generation_counter + 1
 
 print("-- End of evolution --")
-printGenerationInfo(print_divider=False)
-
-
+print_gen_info(print_divider=False)
