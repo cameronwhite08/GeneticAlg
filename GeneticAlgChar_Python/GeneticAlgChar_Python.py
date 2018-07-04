@@ -8,20 +8,31 @@ from deap import tools
 import numpy as np
 
 # global control vars
-Mutation_Probability = 0.7
 population_size = 50
+Mutation_Probability = 0.8
 current_max_fitness = 1
-generation = 0
+generation_counter = 0
+gens_before_print = 100
+pop_keep_percent = .2
 
 # sigmoid function
 def nonlin(x):
     return 1 / (1 + np.exp(-x))
 
-def getRandWeight(z=None):
+
+def getRandWeight():
     return float(2 * np.random.random(1) - 1)
+
+def mutateIndividualWeight(individual, indpb = .5):
+    for idx in range(len(individual)):
+        if random.random() < indpb:
+            individual[idx] = getRandWeight()
+    return individual
+
 
 def individualTonpArray(x):
     return np.array([arr for arr in x])
+
 
 def forwardProp(individual):
     syn0 = individualTonpArray(individual)
@@ -29,6 +40,7 @@ def forwardProp(individual):
     l0 = X
     l1 = nonlin(np.dot(l0, syn0))
     return l1
+
 
 # the goal ('fitness') function to be maximized
 def evaluate_individual(individual):
@@ -38,6 +50,13 @@ def evaluate_individual(individual):
     l1_error = y - l1
 
     return float(1-np.abs(np.sum(l1_error))),
+
+
+def printGenerationInfo(print_divider = True):
+    print("{0}: {1} -- {2}".format(generation_counter, forwardProp(best_individual), current_max_fitness))
+    print("{0}:{1}".format(best_individual[0], best_individual[1]))
+    if print_divider:
+        print('-' * 20)
 
 # currently trying to evolve the AND gate
 # input dataset
@@ -72,7 +91,7 @@ toolbox.register("evaluate", evaluate_individual)
 # register the crossover function
 toolbox.register("crossover", tools.cxUniform, indpb=.5)
 # register a mutation operator with a probability to flip each gene of 0.05
-toolbox.register("mutate", getRandWeight)
+toolbox.register("mutate", mutateIndividualWeight)
 # set the selection method to grab the top performers
 toolbox.register("select", tools.selBest)
 
@@ -86,41 +105,60 @@ for ind, fit in zip(pop, fitnesses):
     ind.fitness.values = fit
 
 # Evolution loop
-while current_max_fitness > .01:
+while abs(current_max_fitness) > .01:
 
-    # Select the top 20% of the population
-    offspring = toolbox.select(pop, int(len(pop) * .2))  # take top 20% of population
-    # Clone the selected individuals (*5 to copy top performers to being the entire new population)
-    offspring = list(map(toolbox.clone, offspring * 5))
+    # Select the top % of the population
+    top_performers = toolbox.select(pop, int(len(pop) * pop_keep_percent))  # take top 20% of population
 
     # Randomly shuffle the population before crossover
-    random.shuffle(offspring)
+    random.shuffle(top_performers)
 
-    # Apply crossover and mutation on the offspring
-    for child1, child2 in zip(offspring[::2], offspring[1::2]):
-        r = toolbox.crossover(child1, child2)
+    next_gen = []
 
-    for mutant in offspring:
+    # Produce enough offspring until the population is refilled
+    # loop until we refill population
+    while len(next_gen) < len(pop):
+        # to get random top performers
+        i = np.random.randint(0, len(top_performers))
+        j = np.random.randint(0, len(top_performers))
+
+        # don't want to crossover with oneself
+        if i == j:
+            continue
+
+        # clone new children to crossover
+        child1 = toolbox.clone(top_performers[i])
+        child2 = toolbox.clone(top_performers[j])
+
+        # crossover
+        new_children = toolbox.crossover(child1, child2)
+
+        # save into next generation
+        next_gen.extend(new_children)
+
+    for mutant in next_gen:
         # mutate an individual with probability Mutation_Probability
         if random.random() < Mutation_Probability:
             toolbox.mutate(mutant)
 
     # Evaluate the individuals
-    population = [individualTonpArray(x) for x in offspring]
+    population = [individualTonpArray(x) for x in next_gen]
     fitnesses = map(toolbox.evaluate, population)
-    for ind, fit in zip(offspring, fitnesses):
+    for ind, fit in zip(next_gen, fitnesses):
         ind.fitness.values = fit
 
     # The population is entirely replaced by the offspring
-    pop[:] = offspring
+    pop[:] = next_gen
 
     best_individual = tools.selBest(pop, 1)
     best_individual = best_individual[0]
     current_max_fitness = best_individual.fitness.values[0]
-    if generation % 100 is 0:
-        print("{0}: {1}".format(generation, forwardProp(best_individual)))
-    generation = generation + 1
+
+    if generation_counter % gens_before_print is 0:
+        printGenerationInfo()
+    generation_counter = generation_counter + 1
 
 print("-- End of evolution --")
+printGenerationInfo(print_divider=False)
 
 
