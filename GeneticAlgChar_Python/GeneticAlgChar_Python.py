@@ -50,8 +50,10 @@ def evaluate_individual(individual):
 
     # how much did we miss?
     l1_error = y - l1
-
-    return float(1-np.abs(np.sum(l1_error))),
+    # print('eval: ' + str(l1) + '\t' + str(abs(1-np.sum(l1_error))))
+    # print('eval2: ' + str(l1) + '\t' + str(abs(np.sum(l1_error))))
+    # print()
+    return float(np.abs(np.sum(l1_error))),
 
 
 def print_gen_info(print_divider=True):
@@ -98,7 +100,7 @@ toolbox.register("crossover", tools.cxUniform, indpb=.5)
 # register a mutation operator with a probability to flip each gene of 0.05
 toolbox.register("mutate", mutate_ind_weight)
 # set the selection method to grab the top performers
-toolbox.register("select", tools.selBest)
+toolbox.register("select", tools.selWorst)
 
 
 # create an initial population of individuals
