@@ -17,7 +17,14 @@ generation_counter = 0
 gens_before_print = 100
 pop_keep_percent = .2
 
-def mutate_ind_weight(individual, indpb=.5):
+num_inputs = 4
+num_outputs = 2
+# only 1 hidden layer for now
+num_hidden_nodes = 5
+
+
+# this is going to change considerably
+def mutate_individual(individual, indpb=.5):
     for idx in range(len(individual)):
         if random.random() < indpb:
             individual[idx] = rand_weight()
@@ -27,25 +34,34 @@ def mutate_ind_weight(individual, indpb=.5):
 def ind_to_np_array(x):
     return np.array([arr for arr in x])
 
-# individual will be structured as follows:
-#
+
 def create_individual(individual):
+    weights = []
     # 4 inputs, 2 outputs, 5 nodes in hidden layer
-    layer1_weights, layer2_weights = net.get_rand_weights(4, 2, 5)
+    layer1_weights, layer2_weights = net.get_rand_weights(num_inputs, num_outputs, num_hidden_nodes)
+
     # flatten weight arrays so it can be stored in the individual
     flat1 = layer1_weights.flatten()
     flat2 = layer2_weights.flatten()
-    # save flat1
-    for i in range(len(flat1)):
-        individual[i] = flat1[i]
-    # do weird indexing, but save flat2
-    for i in range(len(flat1), len(flat1) + len(flat2)):
-        individual[i] = flat2[i-len(flat1)]
-    return individual
+    for x in flat1:
+        weights.append(x)
+    for x in flat2:
+        weights.append(x)
+
+    return individual(x for x in weights)
 
 
 # the goal ('fitness') function to be maximized
+# this will be a loop for a individual's try at the game
 def evaluate_individual(individual):
+
+    arr = ind_to_np_array(individual)
+
+    num_first_layer_weights = num_inputs * num_hidden_nodes
+
+    layer1_w = np.reshape(arr[:num_first_layer_weights], (num_inputs, num_hidden_nodes))
+    layer2_w = np.reshape(arr[num_first_layer_weights:], (num_hidden_nodes, num_outputs))
+
     l1 = forward_prop(individual)
 
     # how much did we miss?
@@ -83,7 +99,7 @@ toolbox.register("evaluate", evaluate_individual)
 # register the crossover function
 toolbox.register("crossover", tools.cxUniform, indpb=.5)
 # register a mutation operator with a probability to flip each gene of 0.05
-toolbox.register("mutate", mutate_ind_weight)
+toolbox.register("mutate", mutate_individual)
 # set the selection method to grab the top performers
 toolbox.register("select", tools.selBest)
 
