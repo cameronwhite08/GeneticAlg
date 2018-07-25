@@ -16,7 +16,8 @@ population_size = 10
 num_generations = 5
 mutation_probability = 0.2
 mate_probability = .5
-current_env = 'CartPole-v0'
+current_env = 'CartPole-v1'
+target_fitness = 5000
 
 net_inputs = 4
 net_outputs = 2
@@ -79,7 +80,7 @@ def evaluate_individual(individual, display=False):
     observation = env.reset()
     fitness = 0
 
-    for t in range(1500):
+    for t in range(target_fitness):
         if display:
             env.render()
         # print(observation)
@@ -150,7 +151,7 @@ if __name__ == '__main__':
         current_max_fitness = -1e10
 
         # Evolution loop
-        while current_max_fitness < 1000:
+        while current_max_fitness < target_fitness:
             pop, book = algorithms.eaSimple(pop, toolbox,
                                             cxpb=mate_probability,  # probability of mating 2 individuals
                                             mutpb=mutation_probability,  # probability of mutating an individual
