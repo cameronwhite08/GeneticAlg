@@ -9,9 +9,10 @@ import multiprocessing
 import numpy as np
 
 import gym
+gym.logger.set_level(40)
 
 # global control vars
-population_size = 50
+population_size = 10
 num_generations = 5
 mutation_probability = 0.2
 mate_probability = .5
@@ -20,7 +21,7 @@ current_env = 'CartPole-v0'
 net_inputs = 4
 net_outputs = 2
 # only 1 hidden layer for now
-num_hidden_nodes = 5
+num_hidden_nodes = 2
 
 
 def mutate_individual(individual, indpb=.1):
@@ -59,29 +60,19 @@ def ind_to_np_array(x):
 
 
 def create_individual(individual):
-    weights = []
     # 4 inputs, 2 outputs, 5 nodes in hidden layer
     layer1_weights, layer2_weights = net.get_rand_weights(net_inputs, net_outputs, num_hidden_nodes)
 
-    # flatten weight arrays so it can be stored in the individual
-    flat1 = layer1_weights.flatten()
-    flat2 = layer2_weights.flatten()
-    for x in flat1:
-        weights.append(x)
-    for x in flat2:
-        weights.append(x)
+    weights = net.flatten(layer1_weights, layer2_weights)
 
     return individual(x for x in weights)
 
 
-# this will be a loop for a individual's try at the game
+# this will be a loop for a individual's attempt at the game
 def evaluate_individual(individual, display=False):
     flat_weights = ind_to_np_array(individual)
-    # find split point of flat_weights
-    num_first_layer_weights = net_inputs * num_hidden_nodes
 
-    layer1_w = np.reshape(flat_weights[:num_first_layer_weights], (net_inputs, num_hidden_nodes))
-    layer2_w = np.reshape(flat_weights[num_first_layer_weights:], (num_hidden_nodes, net_outputs))
+    layer1_w, layer2_w = net.un_flatten(net_inputs, num_hidden_nodes, net_outputs, flat_weights)
 
     # do this to avoid 200 step limit
     env = gym.make(current_env).env
@@ -96,14 +87,18 @@ def evaluate_individual(individual, display=False):
         # get observation into np array
         obs = ind_to_np_array(observation)
 
-        # forward propagate based on the observation and store result as a list
-        result = list(net.forward_prop(obs, layer1_w, layer2_w))
+        # to gain either top value'd choice (classification) or just value (single output)
+        if net_outputs > 1:
+            # forward propagate based on the observation and store result as a list
+            result = list(net.forward_prop(obs, layer1_w, layer2_w))
 
-        # action agent will take is based on output with max result
-        max_index = result.index(max(result))
+            # action agent will take is based on output with max result
+            result = result.index(max(result))
+        else:
+            result = net.forward_prop(obs, layer1_w, layer2_w)
 
         # take a step
-        observation, reward, done, info = env.step(max_index)
+        observation, reward, done, info = env.step(result)
 
         # add reward to agent's fitness
         fitness += reward
@@ -127,7 +122,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 # register the fitness function
 toolbox.register("evaluate", evaluate_individual)
 # register the crossover function
-toolbox.register("mate", tools.cxTwoPoint)
+toolbox.register("mate", tools.cxUniform, indpb=.5)
 # register a mutation operator with a probability to flip each gene of 0.05
 toolbox.register("mutate", mutate_individual)
 # set the selection method to grab the top performers
@@ -152,7 +147,7 @@ if __name__ == '__main__':
         stats.register("min", np.min)
         stats.register("max", np.max)
 
-        current_max_fitness = 0
+        current_max_fitness = -1e10
 
         # Evolution loop
         while current_max_fitness < 1000:
@@ -174,6 +169,10 @@ if __name__ == '__main__':
             print("Current max fitness: {0}".format(current_max_fitness))
     # always close the thread pool
     finally:
+        one, two = net.un_flatten(net_inputs, num_hidden_nodes, net_outputs, ind_to_np_array(bestInd[0]))
+        print('\nThe weights of the best individual')
+        print(one)
+        print(two)
         pool.close()
 
     print("-- End of evolution --")
